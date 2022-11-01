@@ -1,0 +1,1 @@
+npx typeorm-model-generator -h localhost -d social -u root -x plumtree -e mysql -o . -s social
