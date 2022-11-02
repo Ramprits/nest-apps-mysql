@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Comments } from '../entities/Comments';
 import { Likes } from '../entities/Likes';
@@ -10,12 +11,14 @@ import { Users } from '../entities/Users';
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      useFactory: (): TypeOrmModuleOptions => ({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService): TypeOrmModuleOptions => ({
         type: 'mysql',
-        host: 'localhost',
-        username: 'root',
-        database: 'social',
-        password: 'plumtree',
+        port: config.get<number>('MYSQLPORT'),
+        host: config.get<string>('MYSQLHOST'),
+        username: config.get<string>('MYSQLUSER'),
+        database: config.get<string>('MYSQLDATABASE'),
+        password: config.get<string>('MYSQLPASSWORD'),
         entities: [Comments, Likes, Posts, Relations, Stories, Users],
         synchronize: true,
       }),
