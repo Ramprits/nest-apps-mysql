@@ -2,9 +2,9 @@ import { Controller, Post, UseGuards, Request, Body, Get } from '@nestjs/common'
 import { Users } from '../entities/Users';
 import { registerUserDto } from '../user/dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { CurrentUser } from './currentUser.decorator';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { CurrentUser } from './currentUser';
 
 interface UserRequest extends Request {
   user: Users;
