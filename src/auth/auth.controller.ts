@@ -1,4 +1,5 @@
-import { Controller, Post, UseGuards, Request, Body, Get } from '@nestjs/common';
+import { Controller, Post, UseGuards, Body, Get, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { Users } from '../entities/Users';
 import { registerUserDto } from '../user/dto/create-user.dto';
 import { AuthService } from './auth.service';
@@ -6,18 +7,18 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { CurrentUser } from './currentUser';
 
-interface UserRequest extends Request {
-  user: Users;
-}
-
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req: UserRequest) {
-    return this.authService.login(req.user);
+  async login(
+    @CurrentUser() user: Users,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.authService.login(user, response);
+    response.send(user);
   }
 
   @Post('register')
@@ -28,6 +29,14 @@ export class AuthController {
   @Get('profile')
   @UseGuards(JwtAuthGuard)
   async profile(@CurrentUser() user: any) {
+    console.log(user);
     return user;
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  logout(@Res({ passthrough: true }) response: Response) {
+    this.authService.logout(response);
+    response.json({});
   }
 }

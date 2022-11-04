@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TypeOrmCrudService } from '@nestjsx/crud-typeorm';
@@ -17,12 +18,12 @@ export class UserService extends TypeOrmCrudService<Users> {
     super(repo);
   }
 
-  async validateUserForLogin(email: string, password: string) {
+  async validateEmail(email: string, password: string) {
     const user = await this.repo.findOne({
       where: {
         email,
       },
-      select: ['email', 'firstName', 'lastName', 'password', 'id'],
+      select: ['id', 'email', 'password'],
     });
 
     if (!user) {
@@ -30,11 +31,10 @@ export class UserService extends TypeOrmCrudService<Users> {
     }
 
     const passwordMatched = compareHashedPassword(password, user.password);
-
     if (!passwordMatched)
-      throw new NotFoundException(
-        'User email or password does not match please try again.',
-      );
+      throw new UnauthorizedException('Credentials are not valid.');
+
+    delete user.password;
     user.password = undefined;
     return user;
   }
